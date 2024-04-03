@@ -13,49 +13,16 @@ from webdriver_manager.chrome import ChromeDriverManager
 from selenium.webdriver.chrome.service import Service
 from seleniumbase import Driver
 
-# ------------------ Params
+# ------------------ Events Data
 hyrox_events = pd.read_csv("data/hyrox_events.csv")
 
-def scrape_multiple_events(
-    df,
-    division,
-    gender,
-    season="2023-2024",
-    mode="a",
-    results_url="https://results.hyrox.com/season-6/&lang=EN_CAP"
-):
-
-    if division == "pro":
-        event = "HYROX PRO"
-    if division == "open":
-        event = "HYROX"
-    if division == "doubles":
-        event = "HYROX DOUBLES"
-    if division == "pro doubles":
-        event = "HYROX PRO DOUBLES"
-
-    for i in df.index:
-        event_name = df.iat[i,0]
-        config = {
-            "city": event_name,
-            "event": event,
-            "gender": gender,
-            "results": "100",
-            "season": season,
-            "hyrox_path": results_url,
-            "mode": mode, # 'a' or 'w'
-            "export_path": f"data/hyrox_results_{division}_{gender}.csv"
-        }
-        print(f"Scraping: {config}")
-        main(config)
-
 # ------------------ Helper Functions
-
 def select_helper(select_name, option, driver):
     wait = WebDriverWait(driver, 10)
     element = wait.until(EC.presence_of_element_located((By.NAME, select_name)))
     select = Select(element)
     select.select_by_visible_text(option)
+
 
 def get_athlete_table(driver):
     # Create an empty DataFrame
@@ -108,6 +75,7 @@ def get_athlete_table(driver):
     df = pd.concat(all_rows, axis=0,ignore_index=True)
     return df
 
+
 def scrape_page(all_athlete_list, driver):
     # Scrape name pages
     count = len(driver.find_elements(By.CSS_SELECTOR, "h4.list-field.type-fullname"))
@@ -129,7 +97,8 @@ def scrape_page(all_athlete_list, driver):
         index += 1
     return all_athlete_list
 
-def main(config):
+
+def main(config, write=True):
     # Start driver
     driver = Driver(uc=True)
     driver.get(config["hyrox_path"])
@@ -195,28 +164,88 @@ def main(config):
     all_athlete_df = pd.concat(all_athlete_list, axis=0, ignore_index=True)
     all_athlete_df["event_id"] = config["city"] + "_" + config["event"] + "_" + config["gender"]
     all_athlete_df["season"] = config["season"]
-    all_athlete_df.to_csv(config["export_path"], mode=config["mode"], index=False, header=False)
+    if write:
+        all_athlete_df.to_csv(config["export_path"], mode=config["mode"], index=False, header=False)
+    else:
+        return all_athlete_df
     driver.close()
 
-# ------------------ Process
-#config = {
-#    "city": "2023 London",
-#    "event": "HYROX PRO",
-#    "gender": "Men",
-#    "results": "100",
-#    "season": "2023-2024",
-#    "hyrox_path": "https://results.hyrox.com/season-6/&lang=EN_CAP",
-#    "mode": "w", # 'a' or 'w'
-#    "export_path": f"data/hyrox_results_london.csv"
-#}
-#
-#results = main(config)
 
-scrape_multiple_events(
-    hyrox_events,
-    "open",
-    "Women",
+# ------------------ Scraping Functions
+def scrape_multiple_events(
+    df,
+    division,
+    gender,
     season="2023-2024",
     mode="a",
     results_url="https://results.hyrox.com/season-6/&lang=EN_CAP"
-)
+):
+
+    if division == "pro":
+        event = "HYROX PRO"
+    if division == "open":
+        event = "HYROX"
+    if division == "doubles":
+        event = "HYROX DOUBLES"
+    if division == "pro doubles":
+        event = "HYROX PRO DOUBLES"
+
+    for i in df.index:
+        event_name = df.iat[i,0]
+        config = {
+            "city": event_name,
+            "event": event,
+            "gender": gender,
+            "results": "100",
+            "season": season,
+            "hyrox_path": results_url,
+            "mode": mode, # 'a' or 'w'
+            "export_path": f"data/hyrox_results_{division}_{gender}.csv"
+        }
+        print(f"Scraping: {config}")
+        main(config)
+
+
+def scrape_single_event_all_divisions(
+    city,
+    season="2023-2024",
+    mode="a",
+    results_url="https://results.hyrox.com/season-6/&lang=EN_CAP",
+    write_results=True
+):
+
+    divisions = {
+        "Pro Men": {"name": "HYROX PRO", "gender": "Men", "file": "data/hyrox_results_pro.csv"},
+        "Pro Women": {"name": "HYROX PRO", "gender": "Women", "file": "data/hyrox_results_pro.csv"},
+        "Elite Men": {"name": "HYROX ELITE", "gender": "Men", "file": "data/hyrox_results_pro.csv"},
+        "Elite Women": {"name": "HYROX ELITE", "gender": "Women", "file": "data/hyrox_results_pro.csv"},
+        "Open Men": {"name": "HYROX", "gender": "Men", "file": "data/hyrox_results_open_Men.csv"},
+        "Open Women": {"name": "HYROX", "gender": "Women", "file": "data/hyrox_results_open_Women.csv"},
+    }
+
+    for key, value in divisions.items():
+        config = {
+            "city": city,
+            "event": value["name"],
+            "gender": value["gender"],
+            "results": "100",
+            "season": season,
+            "hyrox_path": results_url,
+            "mode": mode, # 'a' or 'w'
+            "export_path": value["file"]
+        }
+        print(f"Scraping: {config}")
+        #main(config, write=write_results)
+
+# ------------------ Process
+
+#scrape_multiple_events(
+#    hyrox_events,
+#    "open",
+#    "Women",
+#    season="2023-2024",
+#    mode="a",
+#    results_url="https://results.hyrox.com/season-6/&lang=EN_CAP"
+#)
+
+scrape_single_event_all_divisions(city="2023 Rimini")
