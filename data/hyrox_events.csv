@@ -1,39 +1,41 @@
-﻿Event Name
-2023 Dallas
-2024 Dubai
-2023 Los Angeles
-2023 Barcelona
-2023 Madrid
-2023 Valencia
-2023 Frankfurt
-2023 Melbourne
-2024 Houston
-2024 Fort Lauderdale
-2023 Hamburg
-2023 Chicago
-2024 Copenhagen
-2023 Malmö
-2024 Manchester
-2023 New York
-2024 Karlsruhe
-2023 München
-2023 Warschau
-2023 Hong Kong
-2023 Milan
-2023 Amsterdam
-2023 Rimini
-2023 London
-2024 Bilbao
-2024 Madrid
-2024 Glasgow
-2023 Paris
-2023 Stockholm
-2023 Dublin
-2024 Katowice
-2023 Sydney
-2023 Singapore
-2024 Incheon
-2024 Turin
-2023 Birmingham
-2024 Vienna - European Championship
-2024 Washington - North American Championships
+﻿Event Name,Order,season,elite
+2023 Rimini,1,2023-2024,No
+2023 New York,2,2023-2024,No
+2023 Sydney,3,2023-2024,No
+2023 Melbourne,4,2023-2024,No
+2023 Dubai,5,2023-2024,No
+2023 Warschau,6,2023-2024,No
+2023 Madrid,7,2023-2024,No
+2023 Malmö,8,2023-2024,No
+2023 Milan,9,2023-2024,No
+2023 Singapore,10,2023-2024,No
+2023 München,11,2023-2024,No
+2023 Birmingham,12,2023-2024,No
+2023 Valencia,13,2023-2024,No
+2023 Dublin,14,2023-2024,No
+2023 Amsterdam,15,2023-2024,No
+2023 Paris,16,2023-2024,No
+2023 Chicago,17,2023-2024,Yes
+2023 Hamburg,18,2023-2024,No
+2023 Barcelona,19,2023-2024,No
+2023 Dallas,20,2023-2024,No
+2023 Hong Kong,21,2023-2024,No
+2023 London,22,2023-2024,No
+2023 Stockholm,23,2023-2024,Yes
+2023 Frankfurt,24,2023-2024,No
+2023 Los Angeles,25,2023-2024,No
+2024 Maastricht,26,2023-2024,No
+2024 Manchester,27,2023-2024,No
+2024 Turin,28,2023-2024,No
+2024 Vienna - European Championship,29,2023-2024,Yes
+2024 Dubai,30,2023-2024,No
+2024 Bilbao,31,2023-2024,No
+2024 Incheon,32,2023-2024,No
+2024 Katowice,33,2023-2024,No
+2024 Fort Lauderdale,34,2023-2024,No
+2024 Washington - North American Championships,35,2023-2024,Yes
+2024 Madrid,36,2023-2024,No
+2024 Glasgow,37,2023-2024,No
+2024 Karlsruhe,38,2023-2024,No
+2024 Houston,39,2023-2024,No
+2024 Copenhagen,40,2023-2024,No
