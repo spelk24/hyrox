@@ -39,7 +39,10 @@ def get_athlete_table(driver):
 
     # Find additional information
     fullname = soup.find("td", class_="f-__fullname last").get_text(strip=True)
-    age_class = soup.find("td", class_="f-age_class last").get_text(strip=True)
+    try:
+        age_class = soup.find("td", class_="f-_type_age_class last").get_text(strip=True)
+    except:
+        age_class = "_NONE_"
     try:
         start_no = soup.find("td", class_="f-start_no_text last").get_text(strip=True)
     except:
@@ -55,9 +58,14 @@ def get_athlete_table(driver):
         desc = row.find('th').get_text(strip=True)
 
         # Extract the time of day, time, and diff from the cells
-        time_day = cells[0].get_text(strip=True)
-        time = cells[1].get_text(strip=True)
-        diff = cells[2].get_text(strip=True)
+        if len(cells) == 3:
+            time_day = cells[0].get_text(strip=True)
+            time = cells[1].get_text(strip=True)
+            diff = cells[2].get_text(strip=True)
+        if len(cells) == 2:
+            time_day = "_NONE_"
+            time = cells[0].get_text(strip=True)
+            diff = cells[1].get_text(strip=True)
 
         # Create a dictionary with the row data
         row_data = pd.DataFrame({
@@ -105,7 +113,7 @@ def main(config, write=True):
     time.sleep(2)
     # Get config selections
     select_helper("event_main_group", config["city"], driver)
-    time.sleep(.5)
+    time.sleep(2)
     select_helper("event", config["event"], driver)
     time.sleep(.5)
     select_helper("search[sex]", config["gender"], driver)
@@ -183,12 +191,22 @@ def scrape_multiple_events(
 
     if division == "pro":
         event = "HYROX PRO"
+        export_path = f"data/hyrox_results_pro.csv"
+    if division == "pro-all":
+        event = "HYROX PRO - Overall"
+        export_path = f"data/hyrox_results_pro.csv"
+    if "ELITE" in division:
+        event = division
+        export_path = f"data/hyrox_results_pro.csv"
     if division == "open":
         event = "HYROX"
+        export_path = f"data/hyrox_results_{division}_{gender}.csv"
     if division == "doubles":
         event = "HYROX DOUBLES"
+        export_path = f"data/hyrox_results_{division}_{gender}.csv"
     if division == "pro doubles":
         event = "HYROX PRO DOUBLES"
+        export_path = f"data/hyrox_results_{division}_{gender}.csv"
 
     for i in df.index:
         event_name = df.iat[i,0]
@@ -200,7 +218,7 @@ def scrape_multiple_events(
             "season": season,
             "hyrox_path": results_url,
             "mode": mode, # 'a' or 'w'
-            "export_path": f"data/hyrox_results_{division}_{gender}.csv"
+            "export_path": export_path
         }
         print(f"Scraping: {config}")
         main(config)
@@ -239,13 +257,25 @@ def scrape_single_event_all_divisions(
 
 # ------------------ Process
 
+event_list = [
+    "2024 Amsterdam"
+]
+scrape_events = hyrox_events[hyrox_events["Event Name"].isin(event_list)].reset_index(drop=True)
+
+scrape_multiple_events(
+    scrape_events,
+    "HYROX ELITE - Thursday",
+    "Men",
+    season="2024-2025",
+    mode="a",
+    results_url="https://results.hyrox.com/season-7/&lang=EN_CAP"
+)
+
 #scrape_multiple_events(
-#    hyrox_events,
-#    "open",
+#    scrape_events,
+#    "pro",
 #    "Women",
 #    season="2023-2024",
 #    mode="a",
 #    results_url="https://results.hyrox.com/season-6/&lang=EN_CAP"
 #)
-
-scrape_single_event_all_divisions(city="2023 Rimini")

@@ -20,6 +20,7 @@ event_path = "../data/hyrox_events.csv"
 
 # ------------ Clean Results
 clean_results = get_clean_results(results_path)
+elite_athletes = get_elites_athletes(clean_results)
 events = pd.read_csv(event_path)
 race_finisher_df = get_race_finisher_df(clean_results, elite_athletes)
 race_finishers_pro_men = (
@@ -34,8 +35,9 @@ race_finishers_pro_men = (
 )
 
 # ------------ ELO Data Prep
+## Find first occurance of sub 65 time (sub 75 for women)
 elo_prep_df = (
-    race_finishers_pro_men[race_finishers_pro_men["sub_70"]]
+    race_finishers_pro_men[race_finishers_pro_men["sub_65"]]
     [["clean_name", "event_name", "Order", "elite", "total_seconds"]]
     .reset_index(drop=True)
     .sort_values("Order")
@@ -54,15 +56,30 @@ for event in elo_prep_df["event_name"].unique():
     event_df = elo_prep_df[elo_prep_df["event_name"] == event].sort_values("total_seconds")
     athletes = event_df["clean_name"].tolist()
     event_elite = event_df[event_df["event_name"] == event]["elite"].unique()[0]
-    
+    athlete_times = event_df["total_seconds"].tolist()
+
     # Generate all pairwise matchups within this event
     for i in range(len(athletes)):
         for j in range(i+1, len(athletes)):
             winner = athletes[i]
             loser = athletes[j]
-            matchups.append([winner, loser, event, event_elite])
+            winner_seconds = athlete_times[i]
+            loser_seconds = athlete_times[j]
+            win_margin = winner_seconds - loser_seconds
+            matchups.append(
+                [winner, loser, event, event_elite, win_margin]
+            )
 
-matchups_df = pd.DataFrame(matchups, columns=["winner", "loser", "event_name", "event_elite"])
+matchups_df = pd.DataFrame(
+    matchups,
+    columns=[
+        "winner", 
+        "loser",
+        "event_name",
+        "event_elite",
+        "win_margin"
+    ]
+)
 
 # --------- ELO Calculation
 def calculate_expected_score(rating_a, rating_b):
@@ -77,9 +94,9 @@ def update_elo_ratings(winner_rating, loser_rating, event_elite):
     Returns the updated ratings as (new_winner_rating, new_loser_rating).
     """
     if event_elite == "Yes":
-        k=32
+        k = 12 + ((-1*win_margin) / 60)
     else:
-        k=16
+        k = 6
 
     expected_score_winner = calculate_expected_score(winner_rating, loser_rating)
     expected_score_loser = 1 - expected_score_winner
@@ -121,3 +138,4 @@ for index, matchup in matchups_df.iterrows():
     ratings.loc[ratings['clean_name'] == matchup['loser'], 'elo_rating'] = new_loser_rating
 
 # Reminder: The actual implementation of the loop is necessary to update the ratings through all matchups.
+ratings = ratings.sort_values(["elo_rating"], ascending=False).reset_index(drop=True)
